@@ -22,7 +22,12 @@ App::App(int argc, char **argv)
     }
     config_file.close();
 
-    //todo: implement app constructor depending on args
+    if(argc < 1)
+    {
+        std::cout << stderr << "\nERROR: Please provide a valid algorithm method.\n";
+        exit(-1);
+    }
+
     if(argc > 2)
     {
         std::cout << stderr << "\nERROR: Too many commands provided. Provide only the algorithm strategy.\n";
@@ -64,6 +69,12 @@ int App::run()
         conf_data_strings[3] = data;
 
         std::vector<std::vector<int>> subject = ut::LoadFile(conf_data_strings[0]);
+
+        if(subject.empty())
+        {
+            printf("Nie udało się wczytać pliku %s\n", conf_data_strings[0].c_str());
+            continue;
+        }
 
         printf("\nRozwiazywanie %s ", conf_data_strings[0].c_str());
         printf("\nIlosc testow - %s ", conf_data_strings[1].c_str());
