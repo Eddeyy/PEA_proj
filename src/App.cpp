@@ -23,6 +23,12 @@ App::App(int argc, char **argv)
     config_file.close();
 
     //todo: implement app constructor depending on args
+    if(argc < 2)
+    {
+        std::cout << stderr << "\nERROR: Please provide a algorithm method.\n";
+        exit(-1);
+    }
+
     if(argc > 2)
     {
         std::cout << stderr << "\nERROR: Too many commands provided. Provide only the algorithm strategy.\n";
@@ -35,6 +41,7 @@ App::App(int argc, char **argv)
             std::cout << stderr << "\nERROR: Unknown command - proceed commands with '-' symbol.\n";
             exit(-1);
         }
+
 
     std::string command = argv[1];
 
