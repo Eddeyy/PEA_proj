@@ -39,6 +39,19 @@ namespace ut
     std::vector<std::vector<int>> LoadFileTSP(std::string & filename);
     std::vector<std::vector<int>> LoadFileATSP(std::string & filename);
     std::vector<std::vector<int>> LoadFileTXT(std::string & filename);
+
+
+    template <typename T, typename D>
+    bool findInPairVector(const std::vector<std::pair<T,D>>&arr, const D&target)
+    {
+        for(auto &i : arr)
+        {
+            if(i.second == target)
+                return true;
+        }
+        return false;
+    }
+
 }
 
 

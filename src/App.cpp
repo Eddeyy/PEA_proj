@@ -3,6 +3,7 @@
 //
 #include <App.hpp>
 #include <BruteForceTSP.hpp>
+#include <HeldKarpTSP.h>
 
 App::App(int argc, char **argv)
 {
@@ -47,6 +48,7 @@ App::App(int argc, char **argv)
     command.erase(command.begin(), command.begin()+2);
 
     if(command == "bf") { this->tsp_strat = new BruteForceTSP; method = "Brute Force"; return;}
+    if(command == "dp") { this->tsp_strat = new HeldKarpTSP; method = "Dynamic programming"; return;}
 
     std::cout << stderr << "\nERROR: Unknown command - please provide a valid problem solving method\n";
 }
@@ -111,8 +113,9 @@ int App::run()
         printf("\nOptymalna sciezka wedlug pliku .ini - %s", conf_data_strings[3].c_str());
         printf("\nOptymalna sciezka dla zadanego problemu : ");
 
-        printf("0 ");
-        for (auto i: tsp_strat->getLatestPath())
+        if(tsp_strat->getLatestPath()[0] != 0)
+            printf("0 ");
+        for (const auto& i: tsp_strat->getLatestPath())
         {
             printf("%d ", i);
         }

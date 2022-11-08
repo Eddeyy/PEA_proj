@@ -1,2 +1,2 @@
 
-include_directories(T{PROJETC_SOURCE_DIR}/include)
+include_directories(${PROJETC_SOURCE_DIR}/include)
