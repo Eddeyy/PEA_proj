@@ -12,7 +12,7 @@ class HeldKarpTSP : public StratTSP
 {
     size_t rec_ID = 0;
     std::map<int, int> valid_vertices;
-    int heldKarp(int currentVertex, std::vector<std::pair<int, bool>> remainingVertices, int shortestPath,
+    int heldKarp(int currentVertex, std::vector<bool> remainingVertices, int shortestPath,
                  int currentPath, const std::vector<std::vector<int>> &adj_mat, int rec = 0);
 public:
     int solve(const std::vector<std::vector<int>> &adj_mat) override;
