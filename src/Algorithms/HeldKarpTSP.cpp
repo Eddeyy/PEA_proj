@@ -7,55 +7,73 @@
 
 int HeldKarpTSP::solve(const std::vector<std::vector<int>> &adj_mat)
 {
-    std::vector<std::pair<int,bool>> remaining;
+    std::vector<bool> remaining;
     latest_path.clear();
     for(int i = 0; i < adj_mat.size(); i++)
     {
-        remaining.emplace_back(std::pair<int,bool>(i,false));
+        remaining.emplace_back(false);
         latest_path.emplace_back(i);
     }
-    remaining[0].second = true;
+    remaining[0] = true;
 
     auto result = heldKarp(0, remaining, INT32_MAX, 0, adj_mat);
     return result;
 }
 
-int HeldKarpTSP::heldKarp(int currentVertex, std::vector<std::pair<int, bool>> remainingVertices, int shortestPath,
+int HeldKarpTSP::heldKarp(int currentVertex, std::vector<bool> remainingVertices, int shortestPath,
                           int currentPath, const std::vector<std::vector<int>> &adj_mat, int rec)
 {
-//    auto it = valid_vertices.find(currentVertex);
-//    if(it == valid_vertices.end())
-//        valid_vertices.insert(std::make_pair(rec, currentVertex));
-//    else
-//    {
-//        valid_vertices.at(rec) = currentVertex;
-//    }
-
-    if(!ut::findInPairVector(remainingVertices,false))
+    /*
+     * Jeśli wszystkie wierzchołki tablicy zostały odwiedzone, nalezy zwrócić obecną wartość kosztu ścieżki,
+     * a następnie dodać do tego koszt powrotu do wierchołka startowego.
+     * */
+    if(std::find(remainingVertices.begin(),remainingVertices.end(),false) == remainingVertices.end())
     {
-        latest_path[latest_path.size()-1] = currentVertex;
         return currentPath + adj_mat[currentVertex][0];
     }
-    else
-    {
-
-        for(int i = 0 ; i < remainingVertices.size(); i++){
-            if(!(remainingVertices[i].second))
+        /*
+         * Rozpatrzeć wszystkie wierchołki sąsiadujące z obecnym.
+         * */
+        for(int i = 0 ; i < remainingVertices.size(); i++)
+        {
+            /*
+             * Sprawdzenie, czy rozpatrywany wierchołek nalezy do nieodwiedzonych
+             * */
+            if (!(remainingVertices[i]))
             {
-                if(currentPath + adj_mat[currentVertex][i] < shortestPath)
+                /*
+                 * Należy sprawdzić, czy obecne rozwiązanie danego podproblemu nie jest już większe od globalnie najkrótszej ścieżki
+                 * */
+                if (currentPath + adj_mat[currentVertex][i] < shortestPath)
                 {
-                    remainingVertices[i].second = true;
-                    int result = heldKarp(i, remainingVertices, shortestPath,currentPath + adj_mat[currentVertex][i], adj_mat, rec + 1);
-                    if(result < shortestPath)
+                    /*
+                     * Jeżeli nie jest, ustawić rozpatrywany wierchołek jako odwiedzony,
+                     * a nastepnie wykonać analogiczną procedurę dla aktualnie rozpatrywanego wierzchołka
+                     * i przypisać otrzymane rozwiązanie podproblemu do zmiennej
+                     */
+                    remainingVertices[i] = true;
+                    int result = heldKarp(i, remainingVertices, shortestPath, currentPath + adj_mat[currentVertex][i],
+                                          adj_mat, rec + 1);
+                    /*
+                     * Jeżeli rozwiązanie podproblemu jest mniejsze od obecnego globalnie minimalnego rozwiązania
+                     */
+                    if (result < shortestPath)
                     {
+                        /*
+                         * Wstawić obecny wierchołek w tablicy finalnej ścieżki na elemencie o indeksie równym obecnemu
+                         * poziomowi rekurencji + 1 i przypisać globalnie minimalnemu rozwiązaniu wynik wywołania rekursywnego
+                         */
                         latest_path[rec + 1] = i;
                         shortestPath = result;
                     }
-
-                    remainingVertices[i].second = false;
+                    /*
+                     * Ustawić własnie rozpatrzony wierchołek, spowrotem jako odwiedzony
+                     * aby umożliwić rozpatrzenie go jako podproblemu dla kolejnego sąsiada obecnego wierchołka
+                     */
+                    remainingVertices[i] = false;
                 }
             }
         }
+        // Zwrócić globalnie minimalne rozwiązanie
         return shortestPath;
-    }
 }
