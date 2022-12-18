@@ -23,6 +23,25 @@ int HeldKarpTSP::solve(const std::vector<std::vector<int>> &adj_mat)
 int HeldKarpTSP::heldKarp(int currentVertex, std::vector<bool> remainingVertices, int shortestPath,
                           int currentPath, const std::vector<std::vector<int>> &adj_mat, int rec)
 {
+<<<<<<< HEAD
+    int result;
+
+    if(std::find(remainingVertices.begin(), remainingVertices.end(),false) == remainingVertices.end())
+        return currentPath + adj_mat[currentVertex][0];
+
+    for(int i = 0 ; i < remainingVertices.size(); i++)
+    {
+        if(!(remainingVertices[i]))
+        {
+            if(currentPath + adj_mat[currentVertex][i] < shortestPath)
+            {
+                remainingVertices[i] = true;
+                result = heldKarp(i, remainingVertices, shortestPath,currentPath + adj_mat[currentVertex][i], adj_mat, rec + 1);
+                if(result < shortestPath)
+                {
+                    latest_path[rec + 1] = i;
+                    shortestPath = result;
+=======
     /*
      * Jeśli wszystkie wierzchołki tablicy zostały odwiedzone, nalezy zwrócić obecną wartość kosztu ścieżki,
      * a następnie dodać do tego koszt powrotu do wierchołka startowego.
@@ -71,9 +90,16 @@ int HeldKarpTSP::heldKarp(int currentVertex, std::vector<bool> remainingVertices
                      * aby umożliwić rozpatrzenie go jako podproblemu dla kolejnego sąsiada obecnego wierchołka
                      */
                     remainingVertices[i] = false;
+>>>>>>> f782ebc2bf2218c7722f1ab1de16138702487220
                 }
+                remainingVertices[i] = false;
             }
         }
+<<<<<<< HEAD
+    }
+
+=======
         // Zwrócić globalnie minimalne rozwiązanie
+>>>>>>> f782ebc2bf2218c7722f1ab1de16138702487220
         return shortestPath;
 }
