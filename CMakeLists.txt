@@ -6,13 +6,12 @@ include_directories(${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/
 add_subdirectory(src)
 
 add_executable(
-        TSP_BF src/main.cpp
-        include/App.hpp
+        TSP_BF
+
+        src/main.cpp
         src/App.cpp
-        include/Algorithms/StratTSP.hpp
-        include/Algorithms/BruteForceTSP.hpp
-        include/Algorithms/HeldKarpTSP.h
         src/Algorithms/BruteForceTSP.cpp
         src/Algorithms/HeldKarpTSP.cpp
+        src/Algorithms/SimulatedAnnealingTSP.cpp
         src/Utilities.cpp
-        include/Utilities.hpp)
+)

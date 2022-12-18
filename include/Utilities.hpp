@@ -13,7 +13,7 @@
 #include <exception>
 #include <vector>
 #include <windows.h>
-
+#include <random>
 
 namespace ut
 {
@@ -32,6 +32,7 @@ namespace ut
     void startCounter();
     double getCounter();
 
+    double random();
     bool is_path_exists(const std::string& s);
     void make_directory(const std::string& s);
     bool file_exists(const std::string& fileName, const std::string& dir);
@@ -50,6 +51,11 @@ namespace ut
                 return true;
         }
         return false;
+    }
+
+    template<typename Base, typename T>
+    inline bool instanceof(const T *ptr) {
+        return dynamic_cast<const Base*>(ptr) != nullptr;
     }
 
 }

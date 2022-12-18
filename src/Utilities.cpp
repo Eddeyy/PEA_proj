@@ -386,3 +386,8 @@ double ut::getCounter()
     return double(li.QuadPart-ut::CounterStart)/ut::PCFreq;
 }
 
+double ut::random()
+{
+    return ((double)rand()/(double)RAND_MAX);
+}
+
