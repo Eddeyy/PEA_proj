@@ -50,7 +50,6 @@ int App::run()
 {
     int result;
     std::string conf_data_strings[7]; // 0 - filename, 1 - test ammount, 2 - optimal weight, 3 - optimal path, 4 - cooling ratio, 5 - start temperature, 7 - max epochs
-    std::vector<double> error_rate;
     srand(time(NULL));
     std::ofstream output_file(config_data[config_data.size()-2]);
     std::ofstream output_file_avg(config_data[config_data.size()-1]);
@@ -61,6 +60,7 @@ int App::run()
         double elapsed_time = 0;
         double avg_elapsed_time = 0;
         double avg_error_rate = 0;
+        std::vector<double> error_rate;
 
         std::string &data = config_data[0];
         for(int i = 0; i < 7; i++)
@@ -108,7 +108,7 @@ int App::run()
             ut::startCounter();
             result = this->tsp_strat->solve(subject);
             elapsed_time = ut::getCounter();
-            double curr_error_rate = (((result - std::stoi(conf_data_strings[2]))*100.0)/result);
+            double curr_error_rate = ((((double)result - std::stod(conf_data_strings[2]))*100.0)/(double)result);
             output_file << elapsed_time << ";";
             output_file << curr_error_rate << std::endl;
             printf("\nOperacja zajela %.6f ms czasu.", elapsed_time);

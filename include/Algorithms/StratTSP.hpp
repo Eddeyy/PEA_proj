@@ -10,7 +10,7 @@
 class StratTSP
 {
 protected:
-    std::vector<int> latest_path;
+    std::vector<int> latest_path = std::vector<int>(1);
 public:
     virtual int solve(const std::vector<std::vector<int>> &adj_mat) = 0;
     std::vector<int> getLatestPath(){return this->latest_path;};

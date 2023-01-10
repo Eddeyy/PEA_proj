@@ -9,7 +9,7 @@ int HeldKarpTSP::solve(const std::vector<std::vector<int>> &adj_mat)
 {
     std::vector<bool> remaining;
     latest_path.clear();
-    for(int i = 0; i < adj_mat.size(); i++)
+    for (int i = 0; i < adj_mat.size(); i++)
     {
         remaining.emplace_back(false);
         latest_path.emplace_back(i);
@@ -23,83 +23,61 @@ int HeldKarpTSP::solve(const std::vector<std::vector<int>> &adj_mat)
 int HeldKarpTSP::heldKarp(int currentVertex, std::vector<bool> remainingVertices, int shortestPath,
                           int currentPath, const std::vector<std::vector<int>> &adj_mat, int rec)
 {
-<<<<<<< HEAD
     int result;
 
-    if(std::find(remainingVertices.begin(), remainingVertices.end(),false) == remainingVertices.end())
-        return currentPath + adj_mat[currentVertex][0];
-
-    for(int i = 0 ; i < remainingVertices.size(); i++)
-    {
-        if(!(remainingVertices[i]))
-        {
-            if(currentPath + adj_mat[currentVertex][i] < shortestPath)
-            {
-                remainingVertices[i] = true;
-                result = heldKarp(i, remainingVertices, shortestPath,currentPath + adj_mat[currentVertex][i], adj_mat, rec + 1);
-                if(result < shortestPath)
-                {
-                    latest_path[rec + 1] = i;
-                    shortestPath = result;
-=======
     /*
      * Jeśli wszystkie wierzchołki tablicy zostały odwiedzone, nalezy zwrócić obecną wartość kosztu ścieżki,
      * a następnie dodać do tego koszt powrotu do wierchołka startowego.
      * */
-    if(std::find(remainingVertices.begin(),remainingVertices.end(),false) == remainingVertices.end())
+    if (std::find(remainingVertices.begin(), remainingVertices.end(), false) == remainingVertices.end())
     {
         return currentPath + adj_mat[currentVertex][0];
     }
+    /*
+     * Rozpatrzeć wszystkie wierchołki sąsiadujące z obecnym.
+     * */
+    for (int i = 0; i < remainingVertices.size(); i++)
+    {
         /*
-         * Rozpatrzeć wszystkie wierchołki sąsiadujące z obecnym.
+         * Sprawdzenie, czy rozpatrywany wierchołek nalezy do nieodwiedzonych
          * */
-        for(int i = 0 ; i < remainingVertices.size(); i++)
+        if (!(remainingVertices[i]))
         {
             /*
-             * Sprawdzenie, czy rozpatrywany wierchołek nalezy do nieodwiedzonych
+             * Należy sprawdzić, czy obecne rozwiązanie danego podproblemu nie jest już większe od globalnie najkrótszej ścieżki
              * */
-            if (!(remainingVertices[i]))
+            if (currentPath + adj_mat[currentVertex][i] < shortestPath)
             {
                 /*
-                 * Należy sprawdzić, czy obecne rozwiązanie danego podproblemu nie jest już większe od globalnie najkrótszej ścieżki
-                 * */
-                if (currentPath + adj_mat[currentVertex][i] < shortestPath)
+                 * Jeżeli nie jest, ustawić rozpatrywany wierchołek jako odwiedzony,
+                 * a nastepnie wykonać analogiczną procedurę dla aktualnie rozpatrywanego wierzchołka
+                 * i przypisać otrzymane rozwiązanie podproblemu do zmiennej
+                 */
+                remainingVertices[i] = true;
+                result = heldKarp(i, remainingVertices, shortestPath,
+                                  currentPath + adj_mat[currentVertex][i],
+                                  adj_mat, rec + 1);
+                /*
+                 * Jeżeli rozwiązanie podproblemu jest mniejsze od obecnego globalnie minimalnego rozwiązania
+                 */
+                if (result < shortestPath)
                 {
                     /*
-                     * Jeżeli nie jest, ustawić rozpatrywany wierchołek jako odwiedzony,
-                     * a nastepnie wykonać analogiczną procedurę dla aktualnie rozpatrywanego wierzchołka
-                     * i przypisać otrzymane rozwiązanie podproblemu do zmiennej
+                     * Wstawić obecny wierchołek w tablicy finalnej ścieżki na elemencie o indeksie równym obecnemu
+                     * poziomowi rekurencji + 1 i przypisać globalnie minimalnemu rozwiązaniu wynik wywołania rekursywnego
                      */
-                    remainingVertices[i] = true;
-                    int result = heldKarp(i, remainingVertices, shortestPath, currentPath + adj_mat[currentVertex][i],
-                                          adj_mat, rec + 1);
-                    /*
-                     * Jeżeli rozwiązanie podproblemu jest mniejsze od obecnego globalnie minimalnego rozwiązania
-                     */
-                    if (result < shortestPath)
-                    {
-                        /*
-                         * Wstawić obecny wierchołek w tablicy finalnej ścieżki na elemencie o indeksie równym obecnemu
-                         * poziomowi rekurencji + 1 i przypisać globalnie minimalnemu rozwiązaniu wynik wywołania rekursywnego
-                         */
-                        latest_path[rec + 1] = i;
-                        shortestPath = result;
-                    }
-                    /*
-                     * Ustawić własnie rozpatrzony wierchołek, spowrotem jako odwiedzony
-                     * aby umożliwić rozpatrzenie go jako podproblemu dla kolejnego sąsiada obecnego wierchołka
-                     */
-                    remainingVertices[i] = false;
->>>>>>> f782ebc2bf2218c7722f1ab1de16138702487220
+                    latest_path[rec + 1] = i;
+                    shortestPath = result;
                 }
+                /*
+                 * Ustawić własnie rozpatrzony wierchołek, spowrotem jako odwiedzony
+                 * aby umożliwić rozpatrzenie go jako podproblemu dla kolejnego sąsiada obecnego wierchołka
+                 */
                 remainingVertices[i] = false;
             }
+            remainingVertices[i] = false;
         }
-<<<<<<< HEAD
     }
-
-=======
-        // Zwrócić globalnie minimalne rozwiązanie
->>>>>>> f782ebc2bf2218c7722f1ab1de16138702487220
-        return shortestPath;
+    // Zwrócić globalnie minimalne rozwiązanie
+    return shortestPath;
 }

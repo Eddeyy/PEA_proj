@@ -8,9 +8,11 @@
 int SimulatedAnnealingTSP::solve(const std::vector<std::vector<int>> &adj_mat)
 {
     size_t verticesNumber = adj_mat.size();
+
     std::vector<int> vertices = getInitialSolution(verticesNumber);
 
     int cost = calculateCost(adj_mat, vertices);
+
     double temperature = _startTemperature;
 
     std::vector<int> bestSolution = vertices;
@@ -46,7 +48,7 @@ int SimulatedAnnealingTSP::solve(const std::vector<std::vector<int>> &adj_mat)
         temperature *= std::pow(_coolingRatio, epoch_counter);
     }
 
-    latest_path = bestSolution;
+    //latest_path = bestSolution;
     return bestCost;
 }
 
