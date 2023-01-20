@@ -16,6 +16,8 @@ class App
     std::vector<std::string> config_data;
     std::vector<double> time_data;
 
+    std::string outputFormat;
+    std::string avgOutputFormat;
 
 public:
     App(int argc, char *argv[]);

@@ -6,6 +6,10 @@
 #include <HeldKarpTSP.h>
 #include <SimulatedAnnealingTSP.h>
 #include <HeuristicStratTSP.h>
+#include <AntColonyOptimizationTSP.h>
+#include <PheromoneLayout.h>
+#include <DAS.h>
+#include <QAS.h>
 
 App::App(int argc, char **argv)
 {
@@ -34,7 +38,20 @@ App::App(int argc, char **argv)
     command.erase(command.begin(), command.begin()+2);
     if(command == "bf") { this->tsp_strat = new BruteForceTSP; method = "Brute Force"; return;}
     if(command == "dp") { this->tsp_strat = new HeldKarpTSP; method = "Dynamic programming"; return;}
-    if(command == "sa") { this->tsp_strat = new SimulatedAnnealingTSP; method = "Simulated annealing"; return;}
+    if(command == "sa")
+    {
+        this->tsp_strat = new SimulatedAnnealingTSP;
+        method = "Simulated annealing";
+        avgOutputFormat = "nazwa_inst;wielkosc_inst;sr_czas;wynik;opt_sciezka;sr_proc_bledu;mn_schl;temp_pocz;rozm_ep";
+        return;
+    }
+    if(command == "aco")
+    {
+        this->tsp_strat = new AntColonyOptimizationTSP(1, 1);
+        method = "Ant Colony Oprimization";
+        avgOutputFormat = "nazwa_inst;wielkosc_inst;sr_czas;wynik;opt_sciezka;sr_proc_bledu;alpha;beta;schem_rozkl";
+        return;
+    }
 
     if(argc > 1)
         if (argv[1][0] != '-')
@@ -49,12 +66,12 @@ App::App(int argc, char **argv)
 int App::run()
 {
     int result;
-    std::string conf_data_strings[7]; // 0 - filename, 1 - test ammount, 2 - optimal weight, 3 - optimal path, 4 - cooling ratio, 5 - start temperature, 7 - max epochs
+    std::string conf_data_strings[7]; // 0 - filename, 1 - test ammount, 2 - optimal weight, 3 - optimal path, 4 - cooling ratio, 5 - start temperature, 6 - max epochs
     srand(time(NULL));
     std::ofstream output_file(config_data[config_data.size()-2]);
     std::ofstream output_file_avg(config_data[config_data.size()-1]);
     
-    output_file_avg << "nazwa_inst;wielkosc_inst;sr_czas;wynik;opt_sciezka;sr_proc_bledu;mn_schl;temp_pocz;rozm_ep" << std::endl;
+    output_file_avg << avgOutputFormat << std::endl;
     
     while(config_data.size() > 2){
         double elapsed_time = 0;
@@ -90,21 +107,47 @@ int App::run()
         }
         output_file << conf_data_strings[3] << std::endl;
 
+
         double coolingRatio = std::stod(conf_data_strings[4]);
         double startTemperature = std::stod(conf_data_strings[5]);
-        size_t epochSize = std::stoull(conf_data_strings[6]);
+        size_t epochSize;
+
+        double alpha = std::stod(conf_data_strings[4]);
+        double beta = std::stod(conf_data_strings[5]);
+
         if(dynamic_cast<SimulatedAnnealingTSP*>(tsp_strat))
         {
+            epochSize = std::stoull(conf_data_strings[6]);
             dynamic_cast<SimulatedAnnealingTSP *>(tsp_strat)->setCoolingRatio(coolingRatio);
             dynamic_cast<SimulatedAnnealingTSP *>(tsp_strat)->setStartTemperature(startTemperature);
             dynamic_cast<SimulatedAnnealingTSP *>(tsp_strat)->setMaxEpoch(epochSize);
         }
+
+        if(dynamic_cast<AntColonyOptimizationTSP*>(tsp_strat))
+        {
+            dynamic_cast<AntColonyOptimizationTSP *>(tsp_strat)->setAlpha(alpha);
+            dynamic_cast<AntColonyOptimizationTSP *>(tsp_strat)->setBeta(beta);
+
+            if(conf_data_strings[6] == "das")
+                dynamic_cast<AntColonyOptimizationTSP *>(tsp_strat)->setPheromoneLayout(new DAS());
+            else if(conf_data_strings[6] == "qas")
+                dynamic_cast<AntColonyOptimizationTSP *>(tsp_strat)->setPheromoneLayout(new QAS());
+        }
+
         for(size_t i = 0; i < std::stoi(conf_data_strings[1]); i++)
         {
             printf("\n\nTest nr %d : ", i);
-            printf("\nMnoznik schladzania : %f", coolingRatio);
-            printf("\nTemperatura poczatkowa : %f", startTemperature);
-            printf("\nRozmiar epoki : %d", epochSize);
+            if(dynamic_cast<SimulatedAnnealingTSP*>(tsp_strat))
+            {
+            }
+
+            if(dynamic_cast<AntColonyOptimizationTSP*>(tsp_strat))
+            {
+                printf("\nWspolczynnik alfa : %f", alpha);
+                printf("\nWspolczynnik beta : %f", beta);
+                printf("\nSchemat rozkladu feromonow : %s", conf_data_strings[6].c_str());
+            }
+
             ut::startCounter();
             result = this->tsp_strat->solve(subject);
             elapsed_time = ut::getCounter();

@@ -12,6 +12,9 @@ add_executable(
         src/App.cpp
         src/Algorithms/BruteForceTSP.cpp
         src/Algorithms/HeldKarpTSP.cpp
+        src/Algorithms/AntColonyOptimizationTSP.cpp
         src/Algorithms/SimulatedAnnealingTSP.cpp
+        src/Algorithms/DAS.cpp
+        src/Algorithms/QAS.cpp
         src/Utilities.cpp
 )
