@@ -3,6 +3,7 @@
 //
 #include <AntColonyOptimizationTSP.h>
 #include <Utilities.hpp>
+#include <QAS.h>
 
 AntColonyOptimizationTSP::AntColonyOptimizationTSP
 (double _alpha, double _beta) : HeuristicStratTSP{4},
@@ -51,23 +52,15 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
                 double prop = 0;
                 double x = rand() / (double)RAND_MAX;
 
-                if(x > 0.9999999)
-                    x = 1.0;
                 for(size_t k = 0; k < cityCount; k++)
                 {
-                    if(ant_positions[j] == k)
-                        continue;
 
                     if(std::find(ant_paths[j].begin(), ant_paths[j].end(), k) != ant_paths[j].end())
                         continue;
 
                     prop += calcPropability(pheromones, ant_paths[j], adj_mat, ant_positions[j], k);
 
-                    if(prop > 0.9999)
-                        prop = 1.0;
-
-
-                    if(x <= prop)
+                    if(x <= prop || k == cityCount-1)
                     {
                         ant_positions[j] = k;
                         ant_paths[j].push_back(k);
@@ -89,9 +82,9 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
         for(size_t i = 0; i < ant_paths.size(); i++)
         {
             int sum = 0;
-            for(size_t j = 0; j < ant_paths.size(); j++)
+            for(size_t j = 0; j < ant_paths[i].size(); j++)
             {
-                if(i != ant_paths[i].size()-1)
+                if(j != ant_paths[i].size()-1)
                     sum += adj_mat[ant_paths[i][j]][ant_paths[i][j+1]];
                 else
                     sum += adj_mat[ant_paths[i][j]][0];
@@ -141,8 +134,8 @@ double AntColonyOptimizationTSP::calcPropability(floatMatrix& tau, std::vector<i
         if(i == k)
             continue;
 
-        double visibility_divider = (adj_mat[i][k] == 0)? std::nextafter(0.0, std::numeric_limits<double>::infinity()) : 1 / ((double) (adj_mat[i][k]));
-        divider += (std::find(tabu.begin(), tabu.end(), k) == tabu.end()) ? (std::pow(tau[i][k], this->alpha) * std::pow(visibility_divider, this->beta)) : 0;
+        double visibility_divider = (adj_mat[i][k] == 0)? 1/0.1 : 1/((double)(adj_mat[i][k]));
+        divider += (std::find(tabu.begin(), tabu.end(), k) == tabu.end()) ? (std::pow(tau[i][k], this->alpha) * std::pow(visibility_divider, this->beta)) : 0.0;
     }
 
     return (std::pow(tau[i][j], this->alpha) * std::pow((1/(double)(adj_mat[i][j])), this->beta)) / divider;

@@ -6,15 +6,17 @@
 
 void QAS::update(floatMatrix &tau, intMatrix &paths, const intMatrix& adj_mat)
 {
-    float update_value = 10.f;
+    float update_value = 100;
 
     for(auto & path : paths)
     {
         int from = path[path.size()-2];
         int to = path[path.size()-1];
 
-        tau[from][to] += update_value/(float)(adj_mat[from][to]);
-        tau[to][from] += update_value/(float)(adj_mat[from][to]);
+        double cost = (adj_mat[from][to] == 0)? 0.1 : adj_mat[from][to];
+
+        tau[from][to] += update_value/(float)(cost);
+        tau[to][from] += update_value/(float)(cost);
     }
 }
 
