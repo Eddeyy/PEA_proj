@@ -177,7 +177,11 @@ int App::run()
         output_file_avg << avg_error_rate << ";";
         output_file_avg << coolingRatio << ";";
         output_file_avg << startTemperature << ";";
-        output_file_avg << epochSize << std::endl;
+
+        if(!dynamic_cast<AntColonyOptimizationTSP*>(tsp_strat))
+            output_file_avg << epochSize << std::endl;
+        else
+            output_file_avg << conf_data_strings[6] << std::endl;
 
         printf("\n\nWaga optymalnej sciezki wedlug pliku .ini : %s ", conf_data_strings[2].c_str());
         printf("\nRozwiazanie problemu metoda %s : %d", this->method.c_str(), result);
