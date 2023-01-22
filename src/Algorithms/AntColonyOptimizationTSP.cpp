@@ -35,10 +35,8 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
 
     AntColonyOptimizationTSP::placeAnts(ant_positions);
 
-    if(cityCount==17)
-        std::cout << "dupa";
 
-    for(size_t iteration = 0; iteration < 100; iteration++ )
+    for(size_t iteration = 0; iteration < 2000; iteration++ )
     {
         for(int i = 0; i < ant_paths.size(); i++)
         {
@@ -50,8 +48,9 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
             for(size_t j = 0; j < cityCount; j++)
             {
                 double prop = 0;
-                double x = rand() / (double)RAND_MAX;
-
+                double x = ut::random();
+                if(x > 1.0)
+                    x = 1.0;
                 for(size_t k = 0; k < cityCount; k++)
                 {
 
@@ -60,7 +59,13 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
 
                     prop += calcPropability(pheromones, ant_paths[j], adj_mat, ant_positions[j], k);
 
-                    if(x <= prop || k == cityCount-1)
+                    if(ant_paths[ant_paths.size()-1].size() == i && j == cityCount-1)
+                        std::cout<<"dupa";
+
+                    if(prop > 0.999)
+                        prop = 1.0;
+
+                    if(x <= prop)
                     {
                         ant_positions[j] = k;
                         ant_paths[j].push_back(k);
@@ -82,12 +87,9 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
         for(size_t i = 0; i < ant_paths.size(); i++)
         {
             int sum = 0;
-            for(size_t j = 0; j < ant_paths[i].size(); j++)
+            for(size_t j = 0; j < cityCount; j++)
             {
-                if(j != ant_paths[i].size()-1)
-                    sum += adj_mat[ant_paths[i][j]][ant_paths[i][j+1]];
-                else
-                    sum += adj_mat[ant_paths[i][j]][0];
+                sum += adj_mat[ant_paths[i][j]][ant_paths[i][j+1]];
             }
 
             ant_costs[i] = sum;
