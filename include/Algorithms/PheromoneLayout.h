@@ -21,7 +21,7 @@ public:
         {
             for (size_t city_to = 0; city_to < cityCount; city_to++)
             {
-                tau[city_from][city_to]+=0.01f;
+                tau[city_from][city_to]=0.01f;
             }
         }
     };

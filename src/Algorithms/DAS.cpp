@@ -14,6 +14,7 @@ void DAS::update(float** tau, int** paths, const intMatrix& adj_mat, size_t& cit
 
         tau[from][to] += update_value;
         tau[to][from] += update_value;
+
     }
 
 }
