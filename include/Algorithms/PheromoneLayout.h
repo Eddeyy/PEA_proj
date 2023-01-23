@@ -14,25 +14,25 @@ protected:
     using floatMatrix = std::vector<std::vector<float>>;
 
 public:
-    virtual void update(floatMatrix &tau, intMatrix& paths, const intMatrix& adj_mat) = 0;
-    virtual void init(std::vector<std::vector<float>> &tau)
+    virtual void update(float** tau, int** paths, const intMatrix& adj_mat, size_t& cityCount, size_t curCity) = 0;
+    virtual void init(float** tau, size_t  &cityCount)
     {
-        for (auto &city_from : tau)
+        for (int city_from = 0; city_from < cityCount; city_from++)
         {
-            for (size_t city_to = 0; city_to < tau.size(); city_to++)
+            for (size_t city_to = 0; city_to < cityCount; city_to++)
             {
-                city_from.push_back(0.01f);
+                tau[city_from][city_to]+=0.01f;
             }
         }
     };
 
-    virtual void evaporate(floatMatrix &tau)
+    virtual void evaporate(float** tau, size_t size)
     {
-        for (auto& from: tau)
+        for (size_t from = 0; from < size; from++)
         {
-            for(auto& to: from)
+            for(size_t to = 0; to < size; to++)
             {
-                to = (to * 0.5) < 0.005 ? 0.005 : (to * 0.5) ;
+                tau[from][to] = (tau[from][to] * 0.5) < 0.005 ? 0.005 : (tau[from][to] * 0.5) ;
             }
         }
     }

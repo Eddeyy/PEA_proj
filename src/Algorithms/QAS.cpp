@@ -4,14 +4,14 @@
 
 #include <QAS.h>
 
-void QAS::update(floatMatrix &tau, intMatrix &paths, const intMatrix& adj_mat)
+void QAS::update(float** tau, int** paths, const intMatrix& adj_mat, size_t& cityCount, size_t curCity)
 {
     float update_value = 100;
 
-    for(auto & path : paths)
+    for(size_t path = 0; path < cityCount; path++)
     {
-        int from = path[path.size()-2];
-        int to = path[path.size()-1];
+        int from = paths[path][curCity];
+        int to = paths[path][curCity-1];
 
         double cost = (adj_mat[from][to] == 0)? 0.1 : adj_mat[from][to];
 

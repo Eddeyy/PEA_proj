@@ -44,11 +44,16 @@ private:
 
     PheromoneLayout* pheromoneLayout;
 
-    static void placeAnts(std::vector<int> &uh);
-    static bool isSinglePath(const std::vector<int> &costs);
+    static void placeAnts(int* uh, size_t &cityCount);
+    static bool isSinglePath(const int* costs, size_t& citycount);
 
-    double calcPropability(floatMatrix& tau, std::vector<int>& tabu, const intMatrix& adj_mat, size_t i, size_t j) const;
+    double calcPropability(float** tau, const int* tabu, const intMatrix& adj_mat, size_t i, size_t j) const;
 
+    static bool arrayContains(const int *const arr, const size_t &arrSize, int val);
+
+    static void deleteMat(int **mat, size_t &size);
+
+    static void deleteMat(float **mat, size_t &size);
 };
 
 #endif //TSP_BF_ANTCOLONYOPTIMIZATIONTSP_H

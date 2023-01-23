@@ -21,29 +21,52 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
      * ant_positions - miasto w którym k-ta mrówka się aktualnie znajduje
      * ant_paths - odwiedzone przez mrówkę miasta
      */
-    std::vector<int> ant_positions(cityCount);
-    intMatrix  ant_paths(cityCount);
-    std::vector<int> ant_costs(cityCount);
-    floatMatrix pheromones(cityCount);
+    int* ant_positions;
+    int**  ant_paths;
+    int* ant_costs;
+    float** pheromones;
+
+    ant_positions = new int[cityCount];
+
+    ant_paths = new int*[cityCount];
+    for(int i = 0; i < cityCount; i++)
+    {
+        ant_paths[i] = new int[cityCount+1];
+        for(int j = 0; j < cityCount; j++)
+        {
+            ant_paths[i][j] = -1;
+        }
+    }
+
+    ant_costs = new int[cityCount];
+
+    pheromones = new float*[cityCount];
+    for(int i = 0; i < cityCount; i++)
+    {
+        pheromones[i] = new float[cityCount];
+    }
 
     int best_cost = INT_MAX;
 
     /*
      * Ustawiamy feromony na wartość początkową
      */
-    this->pheromoneLayout->init(pheromones);
+    this->pheromoneLayout->init(pheromones, cityCount);
 
-    AntColonyOptimizationTSP::placeAnts(ant_positions);
+    AntColonyOptimizationTSP::placeAnts(ant_positions, cityCount);
 
 
     for(size_t iteration = 0; iteration < 2000; iteration++ )
     {
-        for(int i = 0; i < ant_paths.size(); i++)
+        /*
+         * Wstaw pierwsze miasto na początek ścieżki każdej z mrówek.
+         */
+        for(int i = 0; i < cityCount; i++)
         {
-            ant_paths[i].push_back(i);
+            ant_paths[i][0] = i;
         }
 
-        for(int i = 0; i < cityCount ; i++)
+        for(size_t i = 0; i < cityCount ; i++)
         {
             for(size_t j = 0; j < cityCount; j++)
             {
@@ -53,14 +76,8 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
                     x = 1.0;
                 for(size_t k = 0; k < cityCount; k++)
                 {
-
-                    if(std::find(ant_paths[j].begin(), ant_paths[j].end(), k) != ant_paths[j].end())
-                        continue;
-
-                    prop += calcPropability(pheromones, ant_paths[j], adj_mat, ant_positions[j], k);
-
-                    if(ant_paths[ant_paths.size()-1].size() == i && j == cityCount-1)
-                        std::cout<<"dupa";
+                    if(ant_positions[j]!=k)
+                        prop += calcPropability(pheromones, ant_paths[j], adj_mat, ant_positions[j], k);
 
                     if(prop > 0.999)
                         prop = 1.0;
@@ -68,23 +85,26 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
                     if(x <= prop)
                     {
                         ant_positions[j] = k;
-                        ant_paths[j].push_back(k);
+                        ant_paths[j][i+1] = k;
                         break;
                     }
                 }
             }
-            this->pheromoneLayout->update(pheromones, ant_paths, adj_mat);
+            if(i == cityCount-1)
+            {
+                placeAnts(ant_positions, cityCount);
+                for (size_t ant = 0; ant < cityCount; ant++)
+                {
+                    ant_paths[ant][cityCount] = ant;
+                }
+            }
 
-            this->pheromoneLayout->evaporate(pheromones);
+            this->pheromoneLayout->update(pheromones, ant_paths, adj_mat, cityCount, i+1);
+
+            this->pheromoneLayout->evaporate(pheromones, cityCount);
         }
 
-        placeAnts(ant_positions);
-        for(size_t ant = 0; ant < ant_paths.size(); ant++)
-        {
-            ant_paths[ant].push_back(ant);
-        }
-
-        for(size_t i = 0; i < ant_paths.size(); i++)
+        for(size_t i = 0; i < cityCount; i++)
         {
             int sum = 0;
             for(size_t j = 0; j < cityCount; j++)
@@ -100,36 +120,55 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
         if(ut::getCounter() > 600000)
         {
             printf("\n -> osiagnieto warunek stopu : przekroczono czas wykonywania algorytmu 10 min.");
+            deleteMat(ant_paths, cityCount);
+            deleteMat(pheromones, cityCount);
+            delete [] ant_positions;
+            delete [] ant_costs;
             return best_cost;
         }
 
-        if(isSinglePath(ant_costs))
+        if(isSinglePath(ant_costs, cityCount))
         {
             printf("\n -> osiagnieto warunek stopu : uniwersalna sciezka.");
+            deleteMat(ant_paths, cityCount);
+            deleteMat(pheromones, cityCount);
+            delete [] ant_positions;
+            delete [] ant_costs;
             return best_cost;
         }
 
-        for(auto& path : ant_paths)
+        for(int i = 0; i < cityCount; i++)
         {
-            path.clear();
+            for(int j = 0; j < cityCount; j++)
+            {
+                ant_paths[i][j] = -1;
+            }
         }
     }
 
     printf("\n -> osiagnieto warunek stopu : wykonano wszystkie iteracje.");
+
+    deleteMat(ant_paths, cityCount);
+    deleteMat(pheromones, cityCount);
+    delete [] ant_positions;
+    delete [] ant_costs;
     return best_cost;
 }
 
-void AntColonyOptimizationTSP::placeAnts(std::vector<int> &uh)
+void AntColonyOptimizationTSP::placeAnts(int* uh, size_t &cityCount)
 {
-    for (size_t city_count = 0; city_count < uh.size(); city_count++)
+    for (size_t city_count = 0; city_count < cityCount; city_count++)
     {
         uh[city_count] = city_count;
     }
 }
 
-double AntColonyOptimizationTSP::calcPropability(floatMatrix& tau, std::vector<int>& tabu, const intMatrix& adj_mat, size_t i, size_t j) const
+double AntColonyOptimizationTSP::calcPropability(float** tau, const int* tabu, const intMatrix& adj_mat, size_t i, size_t j) const
 {
     double divider = 0.f;
+
+    if(arrayContains(tabu, adj_mat.size()+1, j))
+        return 0.0;
 
     for(int k = 0; k < adj_mat.size(); k++)
     {
@@ -137,10 +176,13 @@ double AntColonyOptimizationTSP::calcPropability(floatMatrix& tau, std::vector<i
             continue;
 
         double visibility_divider = (adj_mat[i][k] == 0)? 1/0.1 : 1/((double)(adj_mat[i][k]));
-        divider += (std::find(tabu.begin(), tabu.end(), k) == tabu.end()) ? (std::pow(tau[i][k], this->alpha) * std::pow(visibility_divider, this->beta)) : 0.0;
+        auto divider_add = (std::pow(tau[i][k], this->alpha) * std::pow(visibility_divider, this->beta));
+        divider += arrayContains(tabu, adj_mat.size()+1, k) ? 0.0 : divider_add ;
     }
 
-    return (std::pow(tau[i][j], this->alpha) * std::pow((1/(double)(adj_mat[i][j])), this->beta)) / divider;
+
+    double result = (std::pow(tau[i][j], this->alpha) * std::pow((1/(double)(adj_mat[i][j])), this->beta)) / divider;
+    return result;
 }
 
 void AntColonyOptimizationTSP::setAlpha(double alpha)
@@ -153,16 +195,44 @@ void AntColonyOptimizationTSP::setBeta(double beta)
     AntColonyOptimizationTSP::beta = beta;
 }
 
-bool AntColonyOptimizationTSP::isSinglePath(const std::vector<int> &costs)
+bool AntColonyOptimizationTSP::isSinglePath(const int* costs, size_t& citycount)
 {
     int sample = costs[0];
-    for(auto &cost : costs)
+    for(int i = 0 ; i < citycount; i++)
     {
-        if(sample != cost)
+        if(sample != costs[i])
             return false;
     }
 
     printf("\n -> osiagnieto warunek stopu : uniwersalna sciezka.");
 
     return true;
+}
+
+void AntColonyOptimizationTSP::deleteMat(int** mat, size_t& size)
+{
+    for(size_t i = 0; i < size; i++)
+    {
+        delete [] mat[i];
+    }
+    delete [] mat;
+}
+
+void AntColonyOptimizationTSP::deleteMat(float** mat, size_t& size)
+{
+    for(size_t i = 0; i < size; i++)
+    {
+        delete [] mat[i];
+    }
+    delete [] mat;
+}
+
+bool AntColonyOptimizationTSP::arrayContains(const int* const arr, const size_t& arrSize, int val)
+{
+    for(size_t i = 0; i < arrSize; i++)
+    {
+        if(arr[i] == val)
+            return true;
+    }
+    return false;
 }

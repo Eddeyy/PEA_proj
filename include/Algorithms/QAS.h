@@ -8,6 +8,6 @@
 class QAS : public PheromoneLayout
 {
 public:
-    void update(floatMatrix &tau, intMatrix& paths, const intMatrix& adj_mat) override;
+    void update(float** tau, int** paths, const intMatrix& adj_mat, size_t& cityCount, size_t curCity) override;
 };
 #endif //TSP_BF_QAS_H

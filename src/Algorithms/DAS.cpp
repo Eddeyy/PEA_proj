@@ -3,14 +3,14 @@
 //
 #include <DAS.h>
 
-void DAS::update(floatMatrix &tau, intMatrix& paths, const intMatrix& adj_mat)
+void DAS::update(float** tau, int** paths, const intMatrix& adj_mat, size_t& cityCount, size_t curCity)
 {
     float update_value = 10.f;
 
-    for(auto & path : paths)
+    for(size_t path = 0; path < cityCount; path++)
     {
-        int from = path[path.size()-2];
-        int to = path[path.size()-1];
+        int from = paths[path][curCity-1];
+        int to = paths[path][curCity];
 
         tau[from][to] += update_value;
         tau[to][from] += update_value;
