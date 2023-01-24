@@ -19,7 +19,10 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
     /*
      * Mrówki reprezentowane są jako dwie tablice
      * ant_positions - miasto w którym k-ta mrówka się aktualnie znajduje
-     * ant_paths - odwiedzone przez mrówkę miasta
+     * ant_paths - odwiedzone przez mrówkę miasta.
+     * Dodatkowo tworzona jest tablica kosztów przechowująca koszt
+     * cyklu każdej mrówki pod przejściu cyklu, oraz macierz
+     * feromonów, odpowiadająca stężeniu na każdej przejściu grafu.
      */
     int* ant_positions;
     int**  ant_paths;
@@ -56,7 +59,7 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
     AntColonyOptimizationTSP::placeAnts(ant_positions, cityCount);
 
 
-    for(size_t iteration = 0; iteration < 2000; iteration++ )
+    for(size_t iteration = 0; iteration < 4000/cityCount; iteration++ )
     {
         /*
          * Wstaw pierwsze miasto na początek ścieżki każdej z mrówek.
@@ -64,6 +67,7 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
         for(int i = 0; i < cityCount; i++)
         {
             ant_paths[i][0] = i;
+            ant_paths[i][cityCount] = i;
         }
 
         for(size_t i = 0; i < cityCount ; i++)
@@ -80,6 +84,7 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
                 {
                     if(!arrayContains(ant_paths[j], cityCount+1, k))
                         prop += calcPropability(pheromones, ant_paths[j], adj_mat, ant_positions[j], k);
+
                     if(prop > 0.999)
                         prop = 1.0;
 
@@ -89,14 +94,6 @@ int AntColonyOptimizationTSP::solve(const std::vector<std::vector<int>> &adj_mat
                         ant_paths[j][i + 1] = k;
                         break;
                     }
-                }
-            }
-            if(i == cityCount-1)
-            {
-                placeAnts(ant_positions, cityCount);
-                for (size_t ant = 0; ant < cityCount; ant++)
-                {
-                    ant_paths[ant][cityCount] = ant;
                 }
             }
             this->pheromoneLayout->update(pheromones, ant_paths, adj_mat, cityCount, i+1);
@@ -174,13 +171,10 @@ double AntColonyOptimizationTSP::calcPropability(float** tau, const int* tabu, c
     {
 
         double visibility_divider = (adj_mat[i][k] == 0)? 1/0.1 : 1/(static_cast<double>(adj_mat[i][k]));
-        auto divider_add = (std::pow(tau[i][k], this->alpha) * std::pow(visibility_divider, this->beta));
-        divider += arrayContains(tabu, adj_mat.size()+1, k) ? 0.0 : divider_add ;
+        divider += arrayContains(tabu, adj_mat.size()+1, k) ? 0.0 : (std::pow(tau[i][k], this->alpha) * std::pow(visibility_divider, this->beta)) ;
     }
 
-
-    double result = (std::pow(tau[i][j], this->alpha) * std::pow((1/static_cast<double>(adj_mat[i][j])), this->beta)) / divider;
-    return result;
+    return (std::pow(tau[i][j], this->alpha) * std::pow((1/static_cast<double>(adj_mat[i][j])), this->beta)) / divider;
 }
 
 void AntColonyOptimizationTSP::setAlpha(double alpha)
